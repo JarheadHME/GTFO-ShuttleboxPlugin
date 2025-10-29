@@ -239,7 +239,7 @@ public partial class Shuttlebox_Core : MonoBehaviour
 
         mat = hatchRenderer.material;
         mat.mainTexture = this.PaintedTexture.CurrentTexture;
-        PaintedTexture.CreateCopy();
+        //PaintedTexture.CreateCopy();
     }
 
     private void TryLinkToShuttlebox()
@@ -412,7 +412,7 @@ public partial class Shuttlebox_Core : MonoBehaviour
     }
     public static void FinishSetupSummonItems()
     {
-        if (IsMaster)
+        if (!IsMaster)
             return;
         foreach (var box in s_setupShuttleboxes)
         {
