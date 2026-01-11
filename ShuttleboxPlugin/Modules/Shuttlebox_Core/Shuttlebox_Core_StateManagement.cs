@@ -1,17 +1,18 @@
-﻿using Player;
-using SNetwork;
-using UnityEngine;
+﻿using AK;
+using AmorLib.Networking.StateReplicators;
 using GameData;
-using LevelGeneration;
-using GTFO.API.Extensions;
-using System.Collections.Generic;
-using ShuttleboxPlugin.Utils;
 using GTFO.API;
-using AK;
+using GTFO.API.Extensions;
 using Il2CppInterop.Runtime.Attributes;
+using LevelGeneration;
+using Player;
+using ShuttleboxPlugin.Utils;
+using SNetwork;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace ShuttleboxPlugin.Modules;
-public partial class Shuttlebox_Core : MonoBehaviour
+public partial class Shuttlebox_Core : MonoBehaviour, IStateReplicatorHolder<pShuttleboxState>
 {
 
     // power cells' (and others ig if they have them) sound doesn't move when they get transferred

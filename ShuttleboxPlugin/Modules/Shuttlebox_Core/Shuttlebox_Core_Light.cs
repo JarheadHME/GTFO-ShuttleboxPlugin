@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmorLib.Networking.StateReplicators;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace ShuttleboxPlugin.Modules;
-public partial class Shuttlebox_Core
+public partial class Shuttlebox_Core : MonoBehaviour, IStateReplicatorHolder<pShuttleboxState>
 {
     public Dictionary<eShuttleboxLightState, Color> LightStateToColor = new()
     {

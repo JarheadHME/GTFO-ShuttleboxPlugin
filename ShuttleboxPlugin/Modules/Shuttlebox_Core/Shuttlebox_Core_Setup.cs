@@ -9,12 +9,12 @@ using GameData;
 using Il2CppInterop.Runtime.Attributes;
 using AIGraph;
 using TerminalQueryAPI;
-using TexturePainterAPI.PaintableTextures;
 using TMPro;
 
 namespace ShuttleboxPlugin.Modules;
-public partial class Shuttlebox_Core : MonoBehaviour
+public partial class Shuttlebox_Core : MonoBehaviour, IStateReplicatorHolder<pShuttleboxState>
 {
+    #region Properties/Fields
     public static bool IsMaster { get => SNet.IsMaster; }
 
     public static List<Shuttlebox_Core> s_setupShuttleboxes = new();
@@ -103,6 +103,7 @@ public partial class Shuttlebox_Core : MonoBehaviour
     public pShuttleboxState State { get => Replicator.State; }
     public eShuttleboxState CurrState { get => State.state; }
     public eShuttleboxInteractionType InteractionType { get => State.type; }
+    #endregion
 
     [HideFromIl2Cpp]
     public void Setup(LG_Area chosen_area, ShuttleboxPlacementData data)
@@ -201,8 +202,12 @@ public partial class Shuttlebox_Core : MonoBehaviour
         if (itemtosummon != null)
             startingState.summonItem = itemtosummon.Get_pItemData();
 
-        Replicator = StateReplicator<pShuttleboxState>.Create((uint)s_setupShuttleboxes.Count, startingState, LifeTimeType.Session);
-        Replicator.OnStateChanged += this.OnStateChange;
+        Replicator = StateReplicator<pShuttleboxState>.Create(
+            replicatorID: (uint)s_setupShuttleboxes.Count, 
+            startState: startingState, 
+            lifeTime: LifeTimeType.Session, 
+            holder: this
+        );
 
         Logger.DebugOnly($"Successfully set up shuttlebox '{DebugName}'");
 
@@ -211,14 +216,12 @@ public partial class Shuttlebox_Core : MonoBehaviour
     public static string MainMeshPath = "Decorations/Shuttlebox_Mesh";
     public static string MainVisualMeshSubpath = "g_prop_machine_dumbwaitershute_01";
     public static string HatchVisualMeshSubpath = "prop_machine_dumbwaitershute_hatch/g_prop_machine_dumbwaitershute_hatch";
-    private PaintableChannelMaskedTexture PaintedTexture = null;
     public void TryChangeShuttleboxColor(Color color1, Color color2)
     {
 
         var parentGO = this.transform.Find(MainMeshPath);
         var mainRenderer = parentGO.Find(MainVisualMeshSubpath).GetComponent<Renderer>();
         var hatchRenderer = parentGO.Find(HatchVisualMeshSubpath).GetComponent<Renderer>();
-        var mat = mainRenderer.material;
 
         if (color1 == default && color2 == default)
         {
@@ -227,19 +230,11 @@ public partial class Shuttlebox_Core : MonoBehaviour
             return;
         }
 
-        if (this.PaintedTexture == null)
-        {
-            this.PaintedTexture = new PaintableChannelMaskedTexture(mat.mainTexture.TryCast<Texture2D>());
-            this.PaintedTexture.SetMainTexture(Assets.ShuttleboxPaintableMainTex);
-            this.PaintedTexture.SetMaskTexture(Assets.ShuttleboxPaintableMask);
-        }
-        this.PaintedTexture.SetTintColor(color1, color2);
+        Assets.ShuttleboxPaintableTexture.SetTintColor(color1, color2);
+        var copy = Assets.ShuttleboxPaintableTexture.CreateCopy();
 
-        mat.mainTexture = this.PaintedTexture.CurrentTexture;
-
-        mat = hatchRenderer.material;
-        mat.mainTexture = this.PaintedTexture.CurrentTexture;
-        //PaintedTexture.CreateCopy();
+        mainRenderer.material.mainTexture = copy;
+        hatchRenderer.material.mainTexture = copy;
     }
 
     private void TryLinkToShuttlebox()
