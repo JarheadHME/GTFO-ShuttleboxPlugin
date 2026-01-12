@@ -97,13 +97,12 @@ public static class ShuttleboxPlacements
 
     static ShuttleboxPlacements()
     {
-        JsonSettings.Converters.Clear();
-        foreach (var converter in GTFO.API.JSON.JsonSerializer.DefaultSerializerSettingsWithLocalizedText.Converters)
-            JsonSettings.Converters.Add(converter);
-
+        JsonSettings = AmorLib.Utils.JsonSerializerUtil.CreateDefaultSettings(useLocalizedText: true, usePartialData: true, useInjectLib: true);
         JsonSettings.Converters.Add(new UnityColorHexConverter());
 
-        if (PDAPIWrapper.HasPData) JsonSettings.Converters.Add(PDAPIWrapper.PersistentIDConverter);
+        JsonSettings.ReadCommentHandling = JsonCommentHandling.Skip;
+        JsonSettings.PropertyNameCaseInsensitive = true;
+        JsonSettings.AllowTrailingCommas = true;
     }
 
     public static void Init()
@@ -176,12 +175,7 @@ public static class ShuttleboxPlacements
         }
     }
 
-    public static readonly JsonSerializerOptions JsonSettings = new JsonSerializerOptions()
-    {
-        ReadCommentHandling = JsonCommentHandling.Skip,
-        PropertyNameCaseInsensitive = true,
-        AllowTrailingCommas = true,
-    };
+    public static readonly JsonSerializerOptions JsonSettings = null;
     public static void LoadShuttleboxes(string json)
     {
         List<ShuttleboxDTO> data = JsonSerializer.Deserialize<List<ShuttleboxDTO>>(json, JsonSettings);
